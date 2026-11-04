@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: texqura-app
+    env: docker
+    plan: free
+    region: oregon

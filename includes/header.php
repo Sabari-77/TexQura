@@ -26,8 +26,11 @@ $userInitials = strtoupper(substr($_SESSION['name'] ?? 'U', 0, 2));
     <!-- Main Navigation Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="brand">
-            <span class="brand-icon-wrap"><i class="bi bi-shield-check"></i></span>
-            <span>TexQura</span>
+            <span class="brand-icon-wrap"><i class="bi bi-grid-3x3"></i></span>
+            <span class="brand-text-wrap">
+                <span>TexQura</span>
+                <span class="brand-subtitle">Fabric QC Platform</span>
+            </span>
             <span class="brand-badge">ISO QC</span>
         </div>
 

@@ -5,6 +5,7 @@ if (!isset($_SESSION['user_id'])) { header("Location: ../login.php"); exit; }
 
 $msg = '';
 
+// Handle Form Submission (Add Fabric)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $code = trim($_POST['fabric_code']);
     $name = trim($_POST['name']);
@@ -24,8 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Fetch all fabrics
 $fabrics = $pdo->query("SELECT * FROM fabrics ORDER BY id DESC")->fetchAll();
 
+// Image map for visual fabric swatches
 $swatchImages = [
     'FAB-COT-01' => 'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=600&auto=format&fit=crop&q=80',
     'FAB-DEN-02' => 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=600&auto=format&fit=crop&q=80',
@@ -41,7 +44,7 @@ include '../includes/header.php';
 <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
     <div>
         <h3 class="fw-bold text-dark mb-0">Fabric Master Data</h3>
-        <p class="text-muted small mb-0">Catalog and monitor fabric varieties, fiber specs, and weave construction.</p>
+        <p class="text-muted small mb-0">Manage and catalog the fabric varieties and weave specifications.</p>
     </div>
     <button class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#fabricModal">
         <i class="bi bi-plus-lg me-1"></i> Add Fabric Variety
@@ -50,6 +53,7 @@ include '../includes/header.php';
 
 <?= $msg ?>
 
+<!-- Visual Swatch Showcase -->
 <div class="row g-3 mb-4">
     <?php foreach ($fabrics as $f): ?>
         <?php $img = $swatchImages[$f['fabric_code']] ?? $defaultSwatch; ?>
@@ -71,6 +75,7 @@ include '../includes/header.php';
     <?php endforeach; ?>
 </div>
 
+<!-- Detailed Specifications Inventory Table -->
 <div class="card overflow-hidden border-0 shadow-sm">
     <div class="card-header bg-white py-3 border-bottom-0">
         <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-table text-primary me-2"></i> Technical Fabric Specifications Table</h6>
@@ -88,13 +93,16 @@ include '../includes/header.php';
                     </tr>
                 </thead>
                 <tbody>
+                    <?php if (empty($fabrics)): ?>
+                        <tr><td colspan="5" class="text-center p-4 text-muted">No fabrics cataloged yet.</td></tr>
+                    <?php endif; ?>
                     <?php foreach ($fabrics as $f): ?>
                     <tr>
                         <td class="ps-4"><span class="code-cell"><?= htmlspecialchars($f['fabric_code']) ?></span></td>
                         <td class="fw-bold text-dark"><?= htmlspecialchars($f['name']) ?></td>
-                        <td><span class="badge bg-light text-dark border"><?= htmlspecialchars($f['type']) ?></span></td>
-                        <td class="text-secondary"><?= htmlspecialchars($f['composition']) ?></td>
-                        <td><span class="badge-status badge-grade-a"><span class="badge-dot"></span> Active</span></td>
+                        <td><span class="badge bg-light text-dark border px-2 py-1"><?= htmlspecialchars($f['type']) ?></span></td>
+                        <td><?= htmlspecialchars($f['composition']) ?></td>
+                        <td><span class="badge-status badge-grade-a"><span class="badge-dot"></span> Active Spec</span></td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -103,35 +111,43 @@ include '../includes/header.php';
     </div>
 </div>
 
+<!-- Add Fabric Modal -->
 <div class="modal fade" id="fabricModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content border-0 shadow rounded-4">
             <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold">Register New Fabric Variety</h5>
+                <h5 class="modal-title fw-bold text-dark">Register New Fabric Variety</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="POST">
-                <div class="modal-body pt-3">
+                <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold">Fabric Code *</label>
-                        <input type="text" name="fabric_code" class="form-control" required placeholder="e.g., FAB-COT-05">
+                        <label class="form-label small fw-bold text-muted">Fabric Code (SKU)</label>
+                        <input type="text" name="fabric_code" class="form-control" required placeholder="e.g. FAB-COT-05">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold">Fabric Name *</label>
-                        <input type="text" name="name" class="form-control" required placeholder="e.g., Egyptian Giza Cotton">
+                        <label class="form-label small fw-bold text-muted">Fabric Description Name</label>
+                        <input type="text" name="name" class="form-control" required placeholder="e.g. Supima Sateen 80s">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold">Weave Construction Type</label>
-                        <input type="text" name="type" class="form-control" placeholder="e.g., Plain Weave, 3/1 Twill, Satin">
+                        <label class="form-label small fw-bold text-muted">Weave / Construction Type</label>
+                        <select name="type" class="form-select" required>
+                            <option value="Plain Weave">Plain Weave</option>
+                            <option value="Twill 2/1">Twill 2/1</option>
+                            <option value="Twill 3/1">Twill 3/1</option>
+                            <option value="Satin / Sateen">Satin / Sateen</option>
+                            <option value="Jacquard">Jacquard</option>
+                            <option value="Knitted Jersey">Knitted Jersey</option>
+                        </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold">Fiber Composition</label>
-                        <input type="text" name="composition" class="form-control" placeholder="e.g., 100% Cotton, 60/40 Poly-Cotton">
+                        <label class="form-label small fw-bold text-muted">Fiber Composition</label>
+                        <input type="text" name="composition" class="form-control" required placeholder="e.g. 100% Supima Cotton">
                     </div>
                 </div>
                 <div class="modal-footer border-top-0 pt-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary px-4">Save Fabric</button>
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Save Fabric</button>
                 </div>
             </form>
         </div>
